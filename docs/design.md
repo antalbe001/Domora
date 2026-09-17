@@ -6,9 +6,9 @@ dell'implementazione. Data: 2026-09-16.
 
 ## Obiettivo
 
-Un sito con un chatbot per un'agenzia immobiliare (Salamon Immobiliare) che
+Un sito con un chatbot per un'agenzia immobiliare che
 permette ai clienti di interrogare in linguaggio naturale gli annunci
-disponibili (es. "trilocale a Pordenone sotto i 150k con box"), con dati in
+disponibili (es. "trilocale sotto i 150k con box"), con dati in
 un formato standardizzato e un backend organizzato secondo design pattern e
 single responsibility.
 
