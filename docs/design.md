@@ -69,9 +69,11 @@ chiuse** in `features`, quindi vengono promosse a campi tipizzati:
   oltre"). Due campi: `floor_label: str` per la visualizzazione,
   `floor_level: int | None` derivato per ordinamento/filtro (terra=0,
   rialzato=0, "5 oltre"=5).
-- **`year_built`**: validator con range largo (1000–2035) per scartare solo
+- **`year_built`**: validator con range largo (500–2035) per scartare solo
   garbage reale, senza toccare outlier plausibili osservati nel dataset
-  (700 = villa storica, 2027 = nuova costruzione).
+  (700 = villa storica, 2027 = nuova costruzione). *Nota: il primo giro di
+  grilling aveva fissato 1000–2035, che avrebbe scartato l'outlier reale
+  700 — corretto in fase di implementazione (TDD sul modello `Listing`).*
 - **`price_eur` per affitti**: 3 capannoni su 29 affitti hanno canoni
   implausibili da mensile (4.500/24.000/24.000€), probabile confusione
   mensile/annuo nello scraper sorgente. **Non modellato nello schema**

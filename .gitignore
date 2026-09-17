@@ -1242,3 +1242,17 @@
 annunci.json
 **/annunci.json
 *.salamon.json
+
+# Virtual environments, caches, build artifacts (pattern-based, covers every subproject)
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+**/.pytest_cache/
+*.egg-info/
+node_modules/
+**/node_modules/
+dist/
+**/dist/
