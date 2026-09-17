@@ -16,7 +16,7 @@ single responsibility.
 
 - **Sito solo-chatbot**: una pagina di chat, niente pagine di annunci
   tradizionali (griglia/filtri a form) nell'MVP. I risultati sono card
-  cliccabili che linkano all'annuncio originale su salamonimmobiliare.com.
+  cliccabili che linkano all'annuncio originale.
   *Perché*: lo scope del chatbot è già limitato alla ricerca annunci; un
   sito a doppio binario raddoppierebbe il lavoro frontend senza che sia
   stato richiesto esplicitamente. Le pagine tradizionali restano
