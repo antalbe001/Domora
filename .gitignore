@@ -1237,3 +1237,8 @@
 .venv/lib/python3.12/site-packages/urllib3-2.7.0.dist-info/RECORD
 .venv/lib/python3.12/site-packages/urllib3-2.7.0.dist-info/WHEEL
 .venv/lib/python3.12/site-packages/urllib3-2.7.0.dist-info/licenses/LICENSE.txt
+
+# Data scraped from salamonimmobiliare.com — not for version control
+annunci.json
+**/annunci.json
+*.salamon.json
