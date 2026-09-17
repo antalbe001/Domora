@@ -46,7 +46,13 @@ chiuse** in `features`, quindi vengono promosse a campi tipizzati:
 - `terraces: int | None`
 - `parking_spaces: int | None` + `parking_type: ParkingType | None`
   (enum: none/open/covered/double/condominial — derivato da valori misti
-  numero/testo tipo "0", "Doppio", "Posto auto scoperto")
+  numero/testo tipo "0", "Doppio", "Posto auto scoperto"). *Interpretazione
+  scelta in implementazione (non esplicitata nel grilling): un conteggio
+  numerico puro (`"1"`, `"2"`) sotto la chiave `garage` è trattato come
+  posti coperti (`COVERED`), dato che "garage" implica un box chiuso;
+  `"0"` → `NONE`. Le descrizioni testuali (`"Posto auto scoperto/coperto/
+  condominiale"`, `"Doppio"`) sovrascrivono questa assunzione. Da rivedere
+  con l'agenzia se l'interpretazione risulta sbagliata sui dati reali.*
 - `kitchen: KitchenType` (enum: separata/open space/angolo cottura)
 - `area_type: AreaType` (enum: centrale/periferia/semicentrale)
 - `furnished: FurnishedStatus` (enum: sì/no/parzialmente)
