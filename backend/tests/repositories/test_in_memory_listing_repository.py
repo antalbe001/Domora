@@ -239,6 +239,16 @@ def test_criteria_combine_with_and() -> None:
     assert _references(found) == ["V1"]
 
 
+def test_replacing_the_catalogue_swaps_what_searches_see() -> None:
+    """How /admin/reload picks up a fresh export without a restart."""
+    repository = InMemoryListingRepository([_listing("V1")])
+
+    repository.replace([_listing("V2"), _listing("V3")])
+
+    assert _references(repository.search(SearchCriteria())) == ["V2", "V3"]
+    assert repository.get_by_reference("V1") is None
+
+
 def test_finds_a_listing_by_its_agency_reference() -> None:
     repository = InMemoryListingRepository([_listing("V1"), _listing("V2")])
 

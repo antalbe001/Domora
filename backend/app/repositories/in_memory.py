@@ -12,6 +12,11 @@ class InMemoryListingRepository:
     def __init__(self, listings: list[Listing]) -> None:
         self._listings = list(listings)
 
+    def replace(self, listings: list[Listing]) -> None:
+        """Swap the whole catalogue for a freshly loaded export. Specific to
+        this file-backed implementation, so it is not part of the port."""
+        self._listings = list(listings)
+
     def search(self, criteria: SearchCriteria) -> list[Listing]:
         return [listing for listing in self._listings if self._matches(listing, criteria)]
 
