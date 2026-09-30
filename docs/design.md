@@ -164,7 +164,17 @@ questa scala).
   privacy/GDPR aggiuntivo).
 - **Streaming**: SSE (`StreamingResponse`) per la sintesi finale del testo;
   la fase di tool-use (filtro) non è streammabile — il frontend mostra
-  "sto cercando...".
+  "sto cercando...". *Deciso in implementazione:* il port `ChatModel` ha un
+  solo metodo `stream()` che emette eventi per **turno**
+  (`TextDelta | ToolCall | TurnEnd`), perché il tipo di turno si scopre
+  mentre arriva; il `ChatService` cicla su quei turni. Il testo che il
+  modello scrive *prima* di chiamare il tool viene streammato all'utente
+  (dice *cosa* sta cercando, meglio di uno spinner generico).
+- **Card del frontend**: il `ChatService` emette due tipi di evento —
+  `TextChunk` (prosa) e `Listings` (gli oggetti `Listing` che il tool ha
+  restituito). Il risultato di un tool ha quindi due destinatari: un payload
+  JSON compatto per il modello e i domain object per le card. Senza questo
+  il frontend non avrebbe dati strutturati da cui disegnare le card.
 - **Rate limiting**: 10 messaggi/minuto per sessione (token bucket in
   memoria), necessario perché ogni messaggio chiama l'API Anthropic a
   pagamento su un sito pubblico.
