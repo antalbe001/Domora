@@ -66,7 +66,11 @@ chiuse** in `features`, quindi vengono promosse a campi tipizzati:
   `features.posizione` (es. `"Via Carlo Goldoni 16 - PORDENONE"`, 96/98
   record regolari, 2 eccezioni senza via). Un `LocationNormalizer` fa
   parsing di `posizione`, popola i campi canonici, mappa il comune alla
-  provincia con una tabella statica (zona di Pordenone, ~23 comuni).
+  provincia con una tabella statica (~23 comuni). *Verificato sul dataset
+  reale: 98/98 annunci ottengono city e province. La tabella non è
+  PN-only — San Michele al Tagliamento è in provincia di Venezia — quindi
+  la provincia va davvero cercata, non assunta. Un comune non in tabella
+  degrada a `province=None`, non solleva eccezione.*
 - **`energy_class` / `heating`**: enum opzionali. `"In fase di redazione"`
   (32/98 record) è un placeholder, non un valore → mappato a `None` in
   normalizzazione. `heating` è `null` nel 59% dei casi, filtro poco
@@ -108,7 +112,13 @@ filtra in modo deterministico, Claude sintetizza il risultato.
   min, camere min, bagni min, classe energetica, ecc.) più
   `keywords: list[str]` come fallback per richieste qualitative non
   coperte da campi strutturati ("ristrutturato", "luminoso"), match per
-  sostringa case-insensitive su titolo/descrizione/raw_features.
+  sostringa case-insensitive su titolo/descrizione/raw_features (tutti i
+  keyword devono essere presenti, semantica AND come per gli altri criteri).
+  *Deciso in implementazione:* un annuncio il cui campo filtrato è `None`
+  **non** soddisfa un bound numerico (es. un annuncio senza `price_eur` non
+  compare in una ricerca "sotto i 150k") — un valore ignoto non può essere
+  dimostrato conforme. *Limite noto:* `energy_class` è match esatto, non
+  ordinale — "almeno classe C" non è ancora supportato.
 - **Grounding**: dopo il filtro, si iniettano nel contesto solo gli
   annunci risultanti (cap ~15, campi essenziali), con system prompt che
   vincola Claude a rispondere esclusivamente su quelli, citando

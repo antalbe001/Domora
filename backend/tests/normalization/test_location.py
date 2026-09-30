@@ -17,6 +17,15 @@ def test_parses_the_city_only_exception_with_no_dash() -> None:
     assert parsed.province == "PN"
 
 
+def test_maps_a_comune_outside_the_pordenone_province() -> None:
+    """The agency's catalogue reaches into provincia di Venezia, so the table
+    cannot assume every comune is PN."""
+    parsed = parse_location("Via Bibione 10 - SAN MICHELE AL TAGLIAMENTO")
+
+    assert parsed.city == "San Michele Al Tagliamento"
+    assert parsed.province == "VE"
+
+
 def test_degrades_to_unknown_province_for_an_unmapped_comune() -> None:
     parsed = parse_location("Via Roma 1 - VENEZIA")
 
