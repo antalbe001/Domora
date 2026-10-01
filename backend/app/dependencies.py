@@ -8,8 +8,11 @@ import logging
 from functools import lru_cache
 
 import anthropic
+from google import genai
 
 from app.llm.anthropic_chat_model import AnthropicChatModel
+from app.llm.chat_model import ChatModel
+from app.llm.gemini_chat_model import GeminiChatModel
 from app.llm.listing_tools import ListingTools
 from app.llm.prompts import SYSTEM_PROMPT
 from app.repositories.export_loader import load_listings
@@ -20,6 +23,23 @@ from app.services.rate_limiter import InMemoryRateLimiter
 from app.settings import Settings, get_settings
 
 logger = logging.getLogger(__name__)
+
+
+def _build_chat_model(settings: Settings) -> ChatModel:
+    if settings.llm_provider == "anthropic":
+        return AnthropicChatModel(
+            client=anthropic.Anthropic(api_key=settings.anthropic_api_key),
+            model=settings.anthropic_model,
+            max_tokens=settings.anthropic_max_tokens,
+        )
+    if settings.llm_provider == "gemini":
+        return GeminiChatModel(
+            client=genai.Client(api_key=settings.gemini_api_key),
+            model=settings.gemini_model,
+        )
+    # Unreachable while llm_provider stays a Literal of the two above — kept
+    # explicit so a loosened type fails loudly instead of silently picking one.
+    raise ValueError(f"Unknown LLM_PROVIDER: {settings.llm_provider!r}")
 
 
 @lru_cache
@@ -61,11 +81,7 @@ def get_rate_limiter() -> InMemoryRateLimiter:
 def get_chat_service() -> ChatService:
     settings: Settings = get_settings()
     return ChatService(
-        model=AnthropicChatModel(
-            client=anthropic.Anthropic(api_key=settings.anthropic_api_key),
-            model=settings.anthropic_model,
-            max_tokens=settings.anthropic_max_tokens,
-        ),
+        model=_build_chat_model(settings),
         tools=ListingTools(
             repository=get_listing_repository(), max_results=settings.max_results
         ),

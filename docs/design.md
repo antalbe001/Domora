@@ -109,6 +109,36 @@ filtra in modo deterministico, Claude sintetizza il risultato.
   (provider sostituibile). Modello default `claude-haiku-4-5`
   (costo/latenza, compito ristretto), configurabile via env var per salire
   a `claude-sonnet-5` se la qualità non basta su richieste ambigue.
+  *Esteso in implementazione:* aggiunto anche `GeminiChatModel` (SDK
+  `google-genai`, su `client.models.generate_content_stream`), selezionabile
+  con `LLM_PROVIDER=gemini` in `.env` senza toccare `ChatService` — prova
+  concreta che il port regge un secondo provider. Verificato leggendo il
+  codice sorgente dell'SDK installato, non solo la documentazione (una pagina
+  trovata durante la ricerca descriveva una superficie "Interactions" più
+  nuova e diversa, con buchi proprio sulla forma esatta della history
+  multi-turno). Due differenze reali rispetto all'adapter Anthropic: l'API
+  Gemini "semplice" (non Enterprise/Vertex) può non restituire un `id` sulla
+  function call, quindi l'adapter ne genera uno (`call-<n>`); e
+  `FunctionResponse` richiede il *nome* del tool, che il tipo neutro
+  `ToolResultMessage` non porta — recuperato dal precedente `AssistantMessage`
+  nella stessa history (replay completo ad ogni turno, come per Anthropic).
+  Nota: `google-genai` tira una versione di `websockets` più vecchia di
+  quella voluta da `uvicorn[standard]`; innocuo qui (niente WebSocket, solo
+  SSE), ma da tenere a mente upgradando l'uno o l'altro.
+
+  *Trovato con la prima prova reale (non dai test, che usano un client
+  finto):* Gemini richiede che il `thought_signature` che assegna a una
+  function-call venga ripetuto identico quando la storia viene rimandata al
+  giro successivo — l'equivalente del "preserved thinking" di Anthropic.
+  Senza, l'API risponde 400 appena il secondo giro del loop tool-use parte.
+  Il campo vive su `Part`, non dentro `FunctionCall`. Risolto aggiungendo a
+  `ToolCall` un campo opaco `provider_data: dict | None` che gli altri
+  adapter ignorano — non si è voluto far risalire un concetto specifico di
+  Gemini nel port neutro. Trovato anche che il modello di default
+  documentato (`gemini-2.0-flash`) non è più servito da questa chiave
+  (404) — il catalogo è arrivato alla generazione 3.x; il default è ora
+  `gemini-flash-latest` (alias che segue sempre il flash corrente, per non
+  ripetere lo stesso 404 al prossimo ritiro di versione).
 - **`SearchCriteria`**: oggetto Pydantic condiviso fra tool LLM, service e
   repository — un campo opzionale per ciascun criterio filtrabile
   (transazione, città, provincia, prezzo min/max, tipologia, superficie

@@ -4,10 +4,13 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.llm.anthropic_chat_model import DEFAULT_MAX_TOKENS, DEFAULT_MODEL
+from app.llm.anthropic_chat_model import DEFAULT_MAX_TOKENS
+from app.llm.anthropic_chat_model import DEFAULT_MODEL as DEFAULT_ANTHROPIC_MODEL
+from app.llm.gemini_chat_model import DEFAULT_MODEL as DEFAULT_GEMINI_MODEL
 from app.llm.listing_tools import DEFAULT_MAX_RESULTS
 from app.services.conversation_store import DEFAULT_MAX_TURNS, DEFAULT_TTL_MINUTES
 from app.services.rate_limiter import DEFAULT_MAX_REQUESTS, DEFAULT_PER_SECONDS
@@ -20,9 +23,20 @@ class Settings(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", extra="ignore"
     )
 
+    # Which ChatModel adapter to wire up. Both ANTHROPIC_API_KEY and
+    # GEMINI_API_KEY can live in .env at once; this just picks which one the
+    # backend actually calls.
+    llm_provider: Literal["anthropic", "gemini"] = "anthropic"
+
     anthropic_api_key: str = ""
-    anthropic_model: str = DEFAULT_MODEL
+    anthropic_model: str = DEFAULT_ANTHROPIC_MODEL
     anthropic_max_tokens: int = DEFAULT_MAX_TOKENS
+
+    gemini_api_key: str = ""
+    # Model availability shifts with Google's own release cadence — if this
+    # default 404s, list what your key can actually call and set
+    # GEMINI_MODEL to one of those.
+    gemini_model: str = DEFAULT_GEMINI_MODEL
 
     # Where the scraper leaves its export, relative to the backend directory.
     listings_path: Path = Path("../annunci.json")

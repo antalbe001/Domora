@@ -29,6 +29,12 @@ class ToolCall:
     id: str
     name: str
     input: dict[str, Any]
+    # Opaque, provider-specific round-trip data a ChatModel may need echoed
+    # back unchanged on a later turn of the *same* answer (e.g. Gemini's
+    # thought_signature). ChatService and other adapters never read this —
+    # it exists so an adapter can recover from its own events what it
+    # couldn't otherwise reconstruct from the neutral fields alone.
+    provider_data: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True)

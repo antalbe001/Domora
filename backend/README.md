@@ -6,8 +6,13 @@ FastAPI backend for the listings chatbot. Design and decisions: [`../docs/design
 
 ```sh
 uv sync --group dev
-cp .env.example .env   # then fill in ANTHROPIC_API_KEY and ADMIN_TOKEN
+cp .env.example .env   # then fill in LLM_PROVIDER + its API key, and ADMIN_TOKEN
 ```
+
+The chat model is behind a port (`app/llm/chat_model.py`); `LLM_PROVIDER` in
+`.env` picks which adapter `app/dependencies.py` wires up — `anthropic` or
+`gemini`. Both API keys can sit in `.env` at once; only the selected one is
+used.
 
 ## Running
 
