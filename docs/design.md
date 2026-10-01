@@ -89,10 +89,13 @@ chiuse** in `features`, quindi vengono promosse a campi tipizzati:
   mensile/annuo nello scraper sorgente. **Non modellato nello schema**
   (niente `price_period`): annotato come bug da verificare in un secondo
   momento sullo scraper, riguarda 3 record su 98.
-- **Immagini**: lo scraper attuale non cattura foto. Va esteso per
-  catturare almeno l'immagine di copertina (`image_url`, URL esterno,
-  nessun hosting nostro) — un chatbot immobiliare senza foto nei risultati
-  è poco utile.
+- **Immagini**: lo scraper cattura l'immagine di copertina (`image_url`, URL
+  esterno, nessun hosting nostro). *Verificato sulle pagine reali:* la foto
+  sta nel primo `.swiper-slide.foto img`. **`og:image` non va usata**: il
+  sito serve lo stesso banner generico (`head_chisiamo.jpg`) su ogni
+  annuncio, quindi la scelta "ovvia" avrebbe dato la stessa foto a tutte le
+  card. Tutti gli annunci raggiungibili del campione hanno almeno una foto,
+  terreni inclusi.
 
 ## Motore di comprensione del linguaggio naturale
 
@@ -204,7 +207,14 @@ chiave.
   vive nel backend ed è importato dallo scraper (entrambi Python).
 - **Deploy**: solo locale per ora, via `docker-compose` (Dockerfile per
   ciascun servizio). Il target cloud si decide quando c'è qualcosa da
-  ospitare.
+  ospitare. *Deciso in implementazione:* il compose fa girare i servizi
+  **come girerebbero in produzione** (frontend buildato dietro nginx, che
+  fa anche da proxy per `/api` dato che fuori da `npm run dev` non c'è il
+  proxy di Vite); per il lavoro quotidiano restano i dev server nativi, che
+  danno l'hot reload. `annunci.json` è montato come volume read-only:
+  aggiornare il catalogo è una run dello scraper, non una rebuild
+  dell'immagine. In `nginx.conf` serve `proxy_buffering off`, altrimenti
+  nginx accumula tutta la risposta e lo streaming SSE non si vede.
 - **Automazione scraping**: manuale per l'MVP — uno script
   `scraper/run_and_reload.sh` che fa scrape + chiama `/admin/reload`,
   lanciato a mano. Costruire uno scheduler ora è prematuro senza sapere la

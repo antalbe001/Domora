@@ -1,0 +1,32 @@
+# Runs the two services as they would run in production: the backend under
+# uvicorn, the built frontend behind nginx (which also proxies /api, since
+# there is no Vite dev proxy outside `npm run dev`).
+#
+#   cp backend/.env.example backend/.env   # fill in ANTHROPIC_API_KEY
+#   docker compose up --build              # http://localhost:8080
+#
+# For day-to-day work prefer the native dev servers — see the two READMEs.
+# They give hot reload, which this deliberately does not.
+
+services:
+  backend:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      # nginx serves the frontend from the same origin, so no cross-origin
+      # request reaches the backend here.
+      CORS_ORIGINS: '[]'
+    volumes:
+      # The catalogue is data: mounted read-only so refreshing it is a
+      # scraper run, not an image rebuild.
+      - ./annunci.json:/data/annunci.json:ro
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

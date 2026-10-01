@@ -49,7 +49,12 @@ NORMALIZED_FIELDS = (
     "year_built",
     "heating",
     "energy_class",
+    "image_url",
 )
+
+# The photo gallery. Deliberately not og:image: the site serves the same
+# generic banner there for every listing, so it carries no information.
+GALLERY_IMAGE_SELECTOR = ".swiper-slide.foto img"
 
 LABEL_TO_FIELD = {
     "prezzo": "price_eur",
@@ -124,6 +129,17 @@ def text_from_description(soup: BeautifulSoup) -> str | None:
     return clean_text(description.get_text(" ", strip=True) if description else None)
 
 
+def cover_image_url(soup: BeautifulSoup, page_url: str) -> str | None:
+    """The first gallery photo, as an absolute URL."""
+    image = soup.select_one(GALLERY_IMAGE_SELECTOR)
+    source = image.get("src") if image else None
+    if not source:
+        return None
+    # Not canonical_url(): that appends a trailing slash, which would break
+    # the filename.
+    return urljoin(page_url, str(source).strip())
+
+
 def empty_listing(url: str, transaction: str) -> dict[str, Any]:
     listing = {field: None for field in NORMALIZED_FIELDS}
     listing["url"] = canonical_url(url)
@@ -169,6 +185,7 @@ def parse_listing(url: str, html: str, transaction: str) -> dict[str, Any]:
         title = clean_text(soup.title.get_text(" ", strip=True).replace(" - Salamon Immobiliare", ""))
     listing["title"] = title
     listing["description"] = text_from_description(soup)
+    listing["image_url"] = cover_image_url(soup, url)
 
     if title:
         reference = re.search(r"\b(?:[A-Z]\d+|\d{5,})\b", title, flags=re.IGNORECASE)

@@ -36,6 +36,27 @@ class ParseListingTests(unittest.TestCase):
         self.assertEqual(listing["features"]["superficie_terrazzo"], "30 mq")
         self.assertEqual(listing["features"]["accessori"], ["Garage", "Cantina"])
 
+    def test_takes_the_first_gallery_photo_as_the_cover(self) -> None:
+        html = (FIXTURES / "listing.html").read_text(encoding="utf-8")
+
+        listing = parse_listing(
+            "https://salamonimmobiliare.com/annunci/v2645-esempio/", html, "sale"
+        )
+
+        self.assertEqual(
+            listing["image_url"],
+            "https://salamonimmobiliare.com/wp-content/uploads/tracciati/immagini/127627/01.JPG",
+        )
+
+    def test_has_no_cover_when_the_listing_has_no_photos(self) -> None:
+        html = "<html><body><h1>V1 - Senza foto</h1></body></html>"
+
+        listing = parse_listing(
+            "https://salamonimmobiliare.com/annunci/v1-senza-foto/", html, "sale"
+        )
+
+        self.assertIsNone(listing["image_url"])
+
     def test_finds_detail_and_pagination_urls_only(self) -> None:
         html = (FIXTURES / "listing_index.html").read_text(encoding="utf-8")
 
